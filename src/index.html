@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="jp">
 <head>
-  <meta charset="UTF-8">
-  <title>GLSL</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="format-detection" content="telephone=no">
+	<meta charset="UTF-8">
+	<title>GLSL</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="format-detection" content="telephone=no">
 
-  <meta property="og:type" content="article"/>
-  <meta property="og:site_name" content=""/>
-  <meta property="og:url" content=""/>
-  <meta property="og:title" content=""/>
-  <meta property="og:image" content=""/>
-  <meta property="og:locale" content="ja_JP"/>
-  <!-- *# -->
-  <meta name="description" content="">
-  <meta property="og:description" content=""/>
+	<meta property="og:type" content="article"/>
+	<meta property="og:site_name" content=""/>
+	<meta property="og:url" content=""/>
+	<meta property="og:title" content=""/>
+	<meta property="og:image" content=""/>
+	<meta property="og:locale" content="ja_JP"/>
+	<!-- *# -->
+	<meta name="description" content="">
+	<meta property="og:description" content=""/>
 
-  <script id="fs" type="x-shader/x-fragment">
+	<script id="fs" type="x-shader/x-fragment">
   precision mediump float;
   uniform float time;
   uniform vec2  mouse;
@@ -27,26 +27,28 @@
       vec2 color = (vec2(1.0) + p.xy) * 0.5;
       gl_FragColor = vec4(color, 0.0, 1.0);
   }
-  </script><!-- /fragment shader -->
 
-  <!-- vertex shader -->
-  <script id="vs" type="x-shader/x-vertex">
+	</script><!-- /fragment shader -->
+
+	<!-- vertex shader -->
+	<script id="vs" type="x-shader/x-vertex">
   attribute vec3 position;
 
   void main(void){
       gl_Position = vec4(position, 1.0);
   }
-  </script>
-  <!-- /vertex shader -->
 
-  <script src="/js/index.js"></script>
-  <link rel="stylesheet" href="/css/index.css">
+	</script>
+	<!-- /vertex shader -->
+
+	<script src="/js/index.js"></script>
+	<link rel="stylesheet" href="/css/index.css">
 
 </head>
 <body>
 
-  <canvas id="canvas"></canvas>
-  <p><input type="checkbox" id="check" checked><label for="check"> auto run</label></p>
+<canvas id="canvas"></canvas>
+<p><input type="checkbox" id="check" checked><label for="check"> auto run</label></p>
 
 </body>
 </html>
