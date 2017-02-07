@@ -1,238 +1,252 @@
-// sample_068
-//
-// GLSL だけでレンダリングする
+window.THREE = require('three');
+var Stats = require('./libs/stats.js');
+var dat　= require('dat-gui');
 
-// GLSL サンプルの(ほぼ)共通仕様 =============================================
-//
-// ・シェーダのコンパイルに失敗した場合は auto run を無効にします
-// ・auto run は 30fps になっているので環境と負荷に応じて適宜変更しましょう
-// ・uniform 変数は以下のようにシェーダへ送られます
-//     ・time: 経過時間を秒単位(ミリ秒は小数点以下)で送る(float)
-//     ・mouse: マウス座標を canvas 左上原点で 0 ～ 1 の範囲で送る(vec2)
-//     ・resolution: スクリーンの縦横の幅をピクセル単位で送る(vec2)
-// ・シェーダのコンパイルに失敗した場合エラー内容をアラートとコンソールに出力
-// ・シェーダのエラーで表示される行番号は一致するように HTML を書いてあります
-//
-// ============================================================================
 
-// global
-var c, cw, ch, mx, my, gl, run, eCheck;
-var startTime;
-var time = 0.0;
-var tempTime = 0.0;
-var fps = 1000 / 30;
-var uniLocation = new Array();
+var Scene = require('./object/Scene.js');
+var Camera = require('./object/Camera.js');
 
-// onload
-window.onload = function () {
-	// canvas エレメントを取得
-	c = document.getElementById('canvas');
+var Mesh = require('./object/mesh.js');
 
-	// canvas サイズ
-	cw = 512;
-	ch = 512;
-	c.width = cw;
-	c.height = ch;
+'use strict';
 
-	// エレメントを取得
-	eCheck = document.getElementById('check');
+(function() {
 
-	// イベントリスナー登録
-	c.addEventListener('mousemove', mouseMove, true);
-	eCheck.addEventListener('change', checkChange, true);
+  // globalオブジェクト
+  if (window.gb === undefined) window.gb = {};
+  window.gb.in = {}; //instance
 
-	// WebGL コンテキストを取得
-	gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+  var sample = window.sample || {};
+  window.sample = sample;
 
-	// シェーダ周りの初期化
-	var prg = create_program(create_shader('vs'), create_shader('fs'));
-	run = (prg != null);
-	if (!run) {
-		eCheck.checked = false;
-	}
-	uniLocation[0] = gl.getUniformLocation(prg, 'time');
-	uniLocation[1] = gl.getUniformLocation(prg, 'mouse');
-	uniLocation[2] = gl.getUniformLocation(prg, 'resolution');
+  //初期化実行
+  $(function() {
+    new sample.MainDisplay();
+  });
 
-	// 頂点データ回りの初期化
-	var position = [
-		-1.0, 1.0, 0.0,
-		1.0, 1.0, 0.0,
-		-1.0, -1.0, 0.0,
-		1.0, -1.0, 0.0
-	];
-	var index = [
-		0, 2, 1,
-		1, 2, 3
-	];
-	var vPosition = create_vbo(position);
-	var vIndex = create_ibo(index);
-	var vAttLocation = gl.getAttribLocation(prg, 'position');
-	gl.bindBuffer(gl.ARRAY_BUFFER, vPosition);
-	gl.enableVertexAttribArray(vAttLocation);
-	gl.vertexAttribPointer(vAttLocation, 3, gl.FLOAT, false, 0, 0);
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vIndex);
+})();
 
-	// その他の初期化
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	mx = 0.5;
-	my = 0.5;
-	startTime = new Date().getTime();
 
-	// レンダリング関数呼出
-	render();
-};
+gb.in.MeshObject = require('./object/mesh.js');
 
-// checkbox
-function checkChange(e) {
-	run = e.currentTarget.checked;
-	if (run) {
-		startTime = new Date().getTime();
-		render();
-	} else {
-		tempTime += time;
-	}
-}
+//Planeをインスタンス化
+// var PlaneObject = new Plane();
 
-// mouse
-function mouseMove(e) {
-	mx = e.offsetX / cw;
-	my = e.offsetY / ch;
-}
+// var MeshObject = new Mesh();
 
-// レンダリングを行う関数
-function render() {
-	// フラグチェック
-	if (!run) {
-		return;
-	}
+(function(){
+  var sample = window.sample || {};
+  window.sample = sample;
 
-	// 時間管理
-	time = (new Date().getTime() - startTime) * 0.001;
+  /**
+   * メインクラス
+   */
+  sample.MainDisplay = function () {
+    //イニシャライズ
+    p.init();
+  };
 
-	// カラーバッファをクリア
-	gl.clear(gl.COLOR_BUFFER_BIT);
+  var p, s;
 
-	// uniform 関連
-	gl.uniform1f(uniLocation[0], time + tempTime);
-	gl.uniform2fv(uniLocation[1], [mx, my]);
-	gl.uniform2fv(uniLocation[2], [cw, ch]);
+  s = sample.MainDisplay;
+  p = s.prototype;
 
-	// 描画
-	gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-	gl.flush();
+  var renderScene;
 
-	// 再帰
-	setTimeout(render, fps);
-}
+  /**
+   * イニシャライズ
+   */
+  p.init = function () {
+    var self = this;
 
-// シェーダを生成する関数
-function create_shader(id) {
-	// シェーダを格納する変数
-	var shader;
+    var stats = initStats();
 
-	// HTMLからscriptタグへの参照を取得
-	var scriptElement = document.getElementById(id);
+    this.$window = $(window);
+    this.$MainDisplay = $('#WebGL-output');
 
-	// scriptタグが存在しない場合は抜ける
-	if (!scriptElement) {
-		return;
-	}
+    this.timer += 0.01;
 
-	// scriptタグのtype属性をチェック
-	switch (scriptElement.type) {
+    //WebGL renderer
+    gb.in.renderer = this.renderer = new THREE.WebGLRenderer({antialias: true});
+    if (!this.renderer) {
+      alert('Three.jsの初期化に失敗しました。');
+    }
+    this.renderer.setClearColor(new THREE.Color(0xEEEEEE));
+    this.renderer.setSize( window.innerWidth, window.innerHeight );
+    this.renderer.shadowMap.enabled = true;
 
-		// 頂点シェーダの場合
-		case 'x-shader/x-vertex':
-			shader = gl.createShader(gl.VERTEX_SHADER);
-			break;
+    // 高解像度対応
+    var pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    this.renderer.setPixelRatio(pixelRatio);
 
-		// フラグメントシェーダの場合
-		case 'x-shader/x-fragment':
-			shader = gl.createShader(gl.FRAGMENT_SHADER);
-			break;
-		default :
-			return;
-	}
+    //scene
+    gb.in.scene = new Scene();
+    this.scene = gb.in.scene.scene;
 
-	// 生成されたシェーダにソースを割り当てる
-	gl.shaderSource(shader, scriptElement.text);
+    //camera
+    gb.in.camera = new Camera();
+    this.camera = gb.in.camera.camera;
 
-	// シェーダをコンパイルする
-	gl.compileShader(shader);
+    // add subtle ambient lighting
+    var ambientLight = new THREE.AmbientLight(0x090909);
+    this.scene.add(ambientLight);
 
-	// シェーダが正しくコンパイルされたかチェック
-	if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    // add spotlight for the shadows
+    var spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(-25, 25, 32);
+    spotLight.castShadow = true;
+    this.scene.add(spotLight);
 
-		// 成功していたらシェーダを返して終了
-		return shader;
-	} else {
+    // window resize
+    this.$window.on('resize', function(e) {
+      self.onResize();
+    });
 
-		// 失敗していたらエラーログをアラートしコンソールに出力
-		alert(gl.getShaderInfoLog(shader));
-		console.log(gl.getShaderInfoLog(shader));
-	}
-}
+    // resizeイベントを発火してキャンバスサイズをリサイズ
+    this.$window.trigger('resize');
 
-// プログラムオブジェクトを生成しシェーダをリンクする関数
-function create_program(vs, fs) {
-	// プログラムオブジェクトの生成
-	var program = gl.createProgram();
+    //Cubeをインスタンス化
+    gb.in.MeshObject = new Mesh();
+    this.MeshObject = gb.in.MeshObject.mesh;
 
-	// プログラムオブジェクトにシェーダを割り当てる
-	gl.attachShader(program, vs);
-	gl.attachShader(program, fs);
+    //Planeをシーンに追加
+    this.scene.add(this.MeshObject);
 
-	// シェーダをリンク
-	gl.linkProgram(program);
 
-	// シェーダのリンクが正しく行なわれたかチェック
-	if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    document.getElementById("WebGL-output").appendChild(this.renderer.domElement);
 
-		// 成功していたらプログラムオブジェクトを有効にする
-		gl.useProgram(program);
+    renderScene = function () {
+      stats.update();
 
-		// プログラムオブジェクトを返して終了
-		return program;
-	} else {
+      // rotate the cube around its axes
+      // this.CubeObject.rotation.x += 0.02;
+      // this.CubeObject.rotation.y += 0.02;
+      // this.CubeObject.rotation.z += 0.02;
+      //
+      // step += 0.01;
+      // this.camera.position.z += (this.CubeObject.position.z+100 - this.camera.position.z)*0.1;
+      // this.camera.position.y += (this.CubeObject.position.y+50 - this.camera.position.y)*0.1;
+      // this.camera.position.x = Math.cos(step) * 200;
+      // this.camera.position.y = Math.sin(step*2) * 90;
+      // this.camera.position.z = Math.sin(step) * 90 + 200;
 
-		// 失敗していたら NULL を返す
-		return null;
-	}
-}
+      // this.lookat_x = Math.sin(step*0.4)*50;
+      // this.lookat_y = Math.cos(step*1.4)*50;
 
-// VBOを生成する関数
-function create_vbo(data) {
-	// バッファオブジェクトの生成
-	var vbo = gl.createBuffer();
+      // this.camera.lookAt(new THREE.Vector3(this.lookat_x, this.lookat_y, 0));
 
-	// バッファをバインドする
-	gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 
-	// バッファにデータをセット
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+      // bounce the sphere up and down
+      // step += 0.04;
+      // sphere.position.x = 20 + ( 10 * (Math.cos(step)));
+      // sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
 
-	// バッファのバインドを無効化
-	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      // render using requestAnimationFrame
+      requestAnimationFrame(renderScene);
+      this.renderer.render(this.scene, this.camera);
+    }.bind(this);
 
-	// 生成した VBO を返して終了
-	return vbo;
-}
+    // call the render function
+    var step = 0;
+    renderScene();
 
-// IBOを生成する関数
-function create_ibo(data) {
-	// バッファオブジェクトの生成
-	var ibo = gl.createBuffer();
 
-	// バッファをバインドする
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
 
-	// バッファにデータをセット
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(data), gl.STATIC_DRAW);
+    /**
+     * dat.gui
+     * dat.guiのコントローラーを定義
+     */
+    // var controls = new function () {
+    //   this.rotationSpeed = 0.001;
+    //   this.bouncingSpeed = 0.001;
+    // };
 
-	// バッファのバインドを無効化
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    // var gui = new dat.GUI();
+    // gui.add(controls, 'rotationSpeed', 0, 0.1);
+    // gui.add(controls, 'bouncingSpeed', 0, 0.1);
 
-	// 生成したIBOを返して終了
-	return ibo;
-}
+    // var render =  function() {
+    //   stats.update();
+    //
+    //
+    //
+    //
+    //   // window.console.log('CubeX',CubeObject.init().rotation.x);
+    //   // rotate the cube around its axes
+    //   // CubeObject.init().rotation.x += controls.rotationSpeed;
+    //   // CubeObject.init().rotation.y += controls.rotationSpeed;
+    //   // CubeObject.init().rotation.z += controls.rotationSpeed;
+    //
+    //   // bounce the sphere up and down
+    //   // step += controls.bouncingSpeed;
+    //   // sphere.position.x = 20 + ( 10 * (Math.cos(step)));
+    //   // sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
+    //
+    //   requestAnimationFrame(render);
+    //   this.renderer.render(this.scene, this.camera);
+    // }.bind(this);
+    // render();
+
+  };
+
+  //Stats表示設定
+  function initStats() {
+
+    var stats = gb.in.stats = new Stats();
+
+    stats.setMode(0); // 0: fps, 1: ms
+
+    // Align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.getElementById("Stats-output").appendChild(stats.domElement);
+
+    return stats;
+  }
+
+  /**
+   * アニメーション開始
+   */
+  // p.start = function() {
+  //   var self = this;
+  //
+  //   var enterFrameHandler = function() {
+  //     requestAnimationFrame(enterFrameHandler);
+  //     self.update();
+  //   };
+  //
+  //   enterFrameHandler();
+  // }
+
+  /**
+   * アニメーションループ内で実行される
+   */
+  p.updateAnimation = function() {
+    requestAnimationFrame(renderScene);
+    this.renderer.render(this.scene, this.camera);
+  };
+
+
+  /**
+   * リサイズ処理
+   */
+  p.onResize = function () {
+
+    this.width = this.$window.width();
+    this.height = this.$window.height();
+
+    this.camera.aspect = this.width / this.height;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(this.width, this.height);
+  };
+
+
+
+  // p.createDatGUIBox = function () {
+
+  // };
+
+})();
