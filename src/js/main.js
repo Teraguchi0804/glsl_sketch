@@ -109,6 +109,7 @@ gb.in.MeshObject = require('./object/mesh.js');
     gb.in.MeshObject = new Mesh();
     this.MeshObject = gb.in.MeshObject.mesh;
 
+
     //Planeをシーンに追加
     this.scene.add(this.MeshObject);
 
@@ -118,36 +119,13 @@ gb.in.MeshObject = require('./object/mesh.js');
     renderScene = function () {
       stats.update();
 
-      // rotate the cube around its axes
-      // this.CubeObject.rotation.x += 0.02;
-      // this.CubeObject.rotation.y += 0.02;
-      // this.CubeObject.rotation.z += 0.02;
-      //
-      // step += 0.01;
-      // this.camera.position.z += (this.CubeObject.position.z+100 - this.camera.position.z)*0.1;
-      // this.camera.position.y += (this.CubeObject.position.y+50 - this.camera.position.y)*0.1;
-      // this.camera.position.x = Math.cos(step) * 200;
-      // this.camera.position.y = Math.sin(step*2) * 90;
-      // this.camera.position.z = Math.sin(step) * 90 + 200;
-
-      // this.lookat_x = Math.sin(step*0.4)*50;
-      // this.lookat_y = Math.cos(step*1.4)*50;
-
-      // this.camera.lookAt(new THREE.Vector3(this.lookat_x, this.lookat_y, 0));
-
-
-      // bounce the sphere up and down
-      // step += 0.04;
-      // sphere.position.x = 20 + ( 10 * (Math.cos(step)));
-      // sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
-
       // render using requestAnimationFrame
       requestAnimationFrame(renderScene);
       this.renderer.render(this.scene, this.camera);
     }.bind(this);
 
     // call the render function
-    var step = 0;
+    // var step = 0;
     renderScene();
 
 
@@ -167,20 +145,6 @@ gb.in.MeshObject = require('./object/mesh.js');
 
     // var render =  function() {
     //   stats.update();
-    //
-    //
-    //
-    //
-    //   // window.console.log('CubeX',CubeObject.init().rotation.x);
-    //   // rotate the cube around its axes
-    //   // CubeObject.init().rotation.x += controls.rotationSpeed;
-    //   // CubeObject.init().rotation.y += controls.rotationSpeed;
-    //   // CubeObject.init().rotation.z += controls.rotationSpeed;
-    //
-    //   // bounce the sphere up and down
-    //   // step += controls.bouncingSpeed;
-    //   // sphere.position.x = 20 + ( 10 * (Math.cos(step)));
-    //   // sphere.position.y = 2 + ( 10 * Math.abs(Math.sin(step)));
     //
     //   requestAnimationFrame(render);
     //   this.renderer.render(this.scene, this.camera);
@@ -239,6 +203,9 @@ gb.in.MeshObject = require('./object/mesh.js');
 
     this.camera.aspect = this.width / this.height;
     this.camera.updateProjectionMatrix();
+
+		// gb.in.uniforms.resolution.value.x = this.width;
+		// gb.in.uniforms.resolution.value.y = this.height;
 
     this.renderer.setSize(this.width, this.height);
   };

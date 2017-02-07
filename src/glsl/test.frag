@@ -25,3 +25,7 @@ void main()	{
     f=(sin(a*g)+1.0)/2.0;
     gl_FragColor=vec4(vec3(f*i/1.6,i/2.0+d/13.0,i)*d*p.x+vec3(i/1.3+d/8.0,i/2.0+d/18.0,i)*d*(1.0-p.x),1.0);
 }
+
+//void main(){
+//    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+//}

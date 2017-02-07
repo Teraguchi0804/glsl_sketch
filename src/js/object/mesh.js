@@ -38,19 +38,16 @@ var Mesh = (function () {
   p.setup = function() {
     this.geometry = new THREE.PlaneBufferGeometry(2, 2);
 
-    this.uniforms = {
+		gb.in.uniforms = this.uniforms = {
       time:       { value: 1.0 },
       resolution: { value: new THREE.Vector2() }
     };
 
     this.material = new THREE.ShaderMaterial( {
       uniforms: this.uniforms,
-      // vertexShader: require('../../glsl/test.vert'),
-      // fragmentShader: require('../../glsl/test.frag')
-
       vertexShader: require('../../glsl/test.vert'),
       fragmentShader: require('../../glsl/test.frag')
-    } );
+    });
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.castShadow = true;
@@ -70,6 +67,11 @@ var Mesh = (function () {
 
   //
   p.update = function () {
+
+    // this.uniforms.time.value += 0.05;
+		gb.in.uniforms.time.value += 0.05;
+		requestAnimationFrame(p.update);
+		gb.in.renderer.render(gb.in.scene.scene, gb.in.camera.camera);
 
   };
 
