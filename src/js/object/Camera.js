@@ -29,22 +29,19 @@ var Camera = (function () {
   };
 
   p.setup = function() {
-
-    // console.log('this',this);
     // console.log('Camera_setup!!!!!');
 
   };
 
   //
   p.create = function () {
-    // this.scene = new THREE.Camera();
 
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
     this.camera.position.x = 0;
     this.camera.position.y = 0;
     this.camera.position.z = 1;
-    this.camera.lookAt( gb.in.scene.scene.position );
+    // this.camera.lookAt( gb.in.scene.scene.position );
   };
 
   //

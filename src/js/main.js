@@ -27,7 +27,7 @@ var Mesh = require('./object/mesh.js');
 })();
 
 
-gb.in.MeshObject = require('./object/mesh.js');
+require('./object/mesh.js');
 
 //Planeをインスタンス化
 // var PlaneObject = new Plane();
@@ -60,6 +60,7 @@ gb.in.MeshObject = require('./object/mesh.js');
     var self = this;
 
     var stats = initStats();
+
 
     this.$window = $(window);
     this.$MainDisplay = $('#WebGL-output');
@@ -108,6 +109,9 @@ gb.in.MeshObject = require('./object/mesh.js');
     //Cubeをインスタンス化
     gb.in.MeshObject = new Mesh();
     this.MeshObject = gb.in.MeshObject.mesh;
+
+
+		window.console.log(gb.in.MeshObject.mesh.uniforms);
 
 
     //Planeをシーンに追加

@@ -67,7 +67,6 @@ var Mesh = (function () {
 
   //
   p.update = function () {
-
     // this.uniforms.time.value += 0.05;
 		gb.in.uniforms.time.value += 0.05;
 		requestAnimationFrame(p.update);
