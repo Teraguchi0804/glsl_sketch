@@ -1,7 +1,7 @@
 window.THREE = require('three');
 var Stats = require('./libs/stats.js');
 var dat　= require('dat-gui');
-
+require('./libs/OrbitControls.js');
 
 var Scene = require('./object/Scene.js');
 var Camera = require('./object/Camera.js');
@@ -87,6 +87,11 @@ require('./object/mesh.js');
     //camera
     gb.in.camera = new Camera();
     this.camera = gb.in.camera.camera;
+
+    //
+    gb.in.controls = new THREE.OrbitControls(this.camera);
+    this.controls = gb.in.controls;
+    this.controls.update();
 
     // add subtle ambient lighting
     var ambientLight = new THREE.AmbientLight(0x090909);
